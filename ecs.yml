@@ -1,0 +1,14 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: ECS
+Parameters:
+  ClusterName:
+    Type: String
+Resources:
+  TestEcsCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Ref ClusterName
+Outputs:
+  ClusterId:
+    Value: !Ref TestEcsCluster
+
