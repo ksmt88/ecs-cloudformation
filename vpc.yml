@@ -11,13 +11,9 @@ Parameters:
     Type: String
   PublicCIP:
     Type: String
-  PublicDIP:
-    Type: String
   PrivateAIP:
     Type: String
   PrivateCIP:
-    Type: String
-  PrivateDIP:
     Type: String
 Resources:
   MyVPC:
@@ -29,27 +25,13 @@ Resources:
       InstanceTenancy: default
       Tags:
         - Key: Name
-          Value: !Ref ProjectName
-  MyPublicRouteTable:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref MyVPC
-      Tags:
-        - Key: Name
-          Value: !Ref ProjectName
-  MyPrivateRouteTable:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref MyVPC
-      Tags:
-        - Key: Name
-          Value: !Ref ProjectName
+          Value: !Join [ "_", [ !Ref ProjectName, !Ref environment] ]
   MyIGW:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
         - Key: Name
-          Value: !Ref ProjectName
+          Value: !Join [ "_", [ !Ref ProjectName, !Ref environment] ]
   MyVPCGW:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
@@ -63,7 +45,7 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Ref ProjectName
+          Value: !Join [ "_", [ !Ref ProjectName, !Ref environment, "publicA"] ]
       VpcId: !Ref MyVPC
   MySubnetPublicC:
     Type: AWS::EC2::Subnet
@@ -73,24 +55,15 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Ref ProjectName
+          Value: !Join [ "_", [ !Ref ProjectName, !Ref environment, "publicC"] ]
       VpcId: !Ref MyVPC
-  MySubnetPublicD:
-    Type: AWS::EC2::Subnet
+  MyPublicRouteTable:
+    Type: AWS::EC2::RouteTable
     Properties:
-      AvailabilityZone: !Select [ 2, !GetAZs '' ]
-      CidrBlock: !Ref PublicDIP
-      MapPublicIpOnLaunch: true
+      VpcId: !Ref MyVPC
       Tags:
         - Key: Name
-          Value: !Ref ProjectName
-      VpcId: !Ref MyVPC
-  MyRoute:
-    Type: AWS::EC2::Route
-    Properties:
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref MyIGW
-      RouteTableId: !Ref MyPublicRouteTable
+          Value: !Join [ "_", [ !Ref ProjectName, !Ref environment, "public"] ]
   MySubnetPublicARouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -101,11 +74,6 @@ Resources:
     Properties:
       RouteTableId: !Ref MyPublicRouteTable
       SubnetId: !Ref MySubnetPublicC
-  MySubnetPublicDRouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref MyPublicRouteTable
-      SubnetId: !Ref MySubnetPublicD
   MySubnetPrivateA:
     Type: AWS::EC2::Subnet
     Properties:
@@ -114,7 +82,7 @@ Resources:
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: !Ref ProjectName
+          Value: !Join [ "_", [ !Ref ProjectName, !Ref environment, "privateA"] ]
       VpcId: !Ref MyVPC
   MySubnetPrivateC:
     Type: AWS::EC2::Subnet
@@ -124,18 +92,15 @@ Resources:
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: !Ref ProjectName
+          Value: !Join [ "_", [ !Ref ProjectName, !Ref environment, "privateC"] ]
       VpcId: !Ref MyVPC
-  MySubnetPrivateD:
-    Type: AWS::EC2::Subnet
+  MyPrivateRouteTable:
+    Type: AWS::EC2::RouteTable
     Properties:
-      AvailabilityZone: !Select [ 2, !GetAZs '' ]
-      CidrBlock: !Ref PrivateDIP
-      MapPublicIpOnLaunch: false
+      VpcId: !Ref MyVPC
       Tags:
         - Key: Name
-          Value: !Ref ProjectName
-      VpcId: !Ref MyVPC
+          Value: !Join [ "_", [ !Ref ProjectName, !Ref environment, "private"] ]
   MySubnetPrivateARouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -146,11 +111,12 @@ Resources:
     Properties:
       RouteTableId: !Ref MyPrivateRouteTable
       SubnetId: !Ref MySubnetPrivateC
-  MySubnetPrivateDRouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
+  MyRoute:
+    Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref MyPrivateRouteTable
-      SubnetId: !Ref MySubnetPrivateD
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref MyIGW
+      RouteTableId: !Ref MyPublicRouteTable
 Outputs:
   VPCId:
     Value: !Ref MyVPC
