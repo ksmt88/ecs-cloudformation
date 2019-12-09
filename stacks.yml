@@ -72,13 +72,38 @@ Resources:
     Properties:
       Parameters:
         RepositoryName: sample_app_php
-      TemplateURL: https://s3-ap-northeast-1.amazonaws.com/cf-templates-1q4n5naoe0i3o-ap-northeast-1/sample/ecr.yml
+      TemplateURL: https://s3-ap-northeast-1.amazonaws.com/{bucket_name}/sample/ecr.yml
 Outputs:
   VPCId:
     Value:
       Fn::GetAtt:
         - VPCStack
         - Outputs.VPCId
+  PublicASubnetId:
+    Value:
+      Fn::GetAtt:
+        - VPCStack
+        - Outputs.PublicASubnetId
+  PublicCSubnetId:
+    Value:
+      Fn::GetAtt:
+        - VPCStack
+        - Outputs.PublicCSubnetId
+  PrivateASubnetId:
+    Value:
+      Fn::GetAtt:
+        - VPCStack
+        - Outputs.PrivateASubnetId
+  PrivateCSubnetId:
+    Value:
+      Fn::GetAtt:
+        - VPCStack
+        - Outputs.PrivateCSubnetId
+  EcsSecurityGroup:
+    Value:
+      Fn::GetAtt:
+        - VPCStack
+        - Outputs.EcsSecurityGroup
   ClusterId:
     Value:
       Fn::GetAtt:

@@ -117,6 +117,37 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref MyIGW
       RouteTableId: !Ref MyPublicRouteTable
+  EcsSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Join [ "_", [ !Ref ProjectName, !Ref environment] ]
+      GroupDescription: !Join [ "_", [ !Ref ProjectName, !Ref environment] ]
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 221.242.248.202/32
+      VpcId: !Ref MyVPC
+      Tags:
+        - Key: Name
+          Value: !Join [ "_", [ !Ref ProjectName, !Ref environment] ]
+  EcsSecurityGroup1Ingress:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: EcsSecurityGroup
+    Properties:
+      GroupId: !Ref EcsSecurityGroup
+      IpProtocol: -1
+      SourceSecurityGroupId: !Ref EcsSecurityGroup
 Outputs:
   VPCId:
     Value: !Ref MyVPC
+  PublicASubnetId:
+    Value: !Ref MySubnetPublicA
+  PublicCSubnetId:
+    Value: !Ref MySubnetPublicC
+  PrivateASubnetId:
+    Value: !Ref MySubnetPrivateA
+  PrivateCSubnetId:
+    Value: !Ref MySubnetPrivateC
+  EcsSecurityGroup:
+    Value: !Ref: EcsSecurityGroup

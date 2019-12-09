@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: ELB
+Parameters:
+  ProjectName:
+    Type: String
+  VPCId:
+    Type: AWS::EC2::VPC::Id
+  PublicASubnetId:
+    Type: AWS::EC2::Subnet::Id
+  PublicCSubnetId:
+    Type: AWS::EC2::Subnet::Id
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup::Id
+  environment:
+    Type: String
+  TargetGroupName:
+    Type: String
+  ELBName:
+    Type: String
+Resources:
+  TestELBTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckEnabled: true
+      HealthCheckIntervalSeconds: 300
+      HealthCheckPath: /
+      HealthCheckPort: 80
+      HealthCheckProtocol: HTTP
+      Name: !Ref TargetGroupName
+      Port: 80
+      Protocol: HTTP
+      Tags:
+        - Key: Name
+          Value: !Join [ "_", [ !Ref ProjectName, !Ref environment, "publicA"] ]
+      TargetType: ip
+      VpcId: !Ref VPCId
+  TestELB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      IpAddressType: ipv4
+      Name: !Ref ELBName
+      Scheme: internet-facing
+      SecurityGroups:
+        - !Ref SecurityGroup
+      Subnets:
+        - !Ref PublicASubnetId
+        - !Ref PublicCSubnetId
+      Tags:
+        - Key: Name
+          Value: !Join [ "_", [ !Ref ProjectName, !Ref environment] ]
+      Type: application
+  TestELBListner:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+
