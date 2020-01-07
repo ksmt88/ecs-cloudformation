@@ -1,0 +1,88 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: RDS
+Parameters:
+  ProjectName:
+    Type: String
+  MasterUserName:
+    Type: String
+  MasterUserPassword:
+    Type: String
+    NoEcho: true
+    Description: least 8 characters
+  PrivateASubnetId:
+    Type: AWS::EC2::Subnet::Id
+  PrivateCSubnetId:
+    Type: AWS::EC2::Subnet::Id
+  VPCSecurityGroup:
+    Type: AWS::EC2::SecurityGroup::Id
+  RDSFamily:
+    Type: String
+  RDSEngine:
+    Type: String
+  RDSEngineVersion:
+    Type: String
+  RDSLicenseModel:
+    Type: String
+  RDSClass:
+    Type: String
+    Default: db.t2.micro
+  RDSName:
+    Type: String
+  StrageSize:
+    Type: Number
+    Default: 20
+  MultiAZchoice:
+    Type: String
+    Default: false
+  PubliclyAccessible:
+    Type: String
+    Default: false
+  environment:
+    Type: String
+Resources:
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName: !Join [ "_", [ !Ref ProjectName, !Ref environment] ]
+      DBSubnetGroupDescription: !Join [ "_", [ !Ref ProjectName, !Ref environment] ]
+      SubnetIds:
+        - Ref: PrivateASubnetId
+        - Ref: PrivateCSubnetId
+  RDSDBParameterGroup:
+    Type: AWS::RDS::DBParameterGroup
+    Properties:
+      Description: !Join [ "_", [ !Ref ProjectName, !Ref environment] ]
+      Family: !Ref RDSFamily
+  DB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBName: !Join [ "", [ !Ref RDSName, !Ref environment] ]
+      AllocatedStorage: !Ref StrageSize
+      AllowMajorVersionUpgrade: true
+      AutoMinorVersionUpgrade: true
+      BackupRetentionPeriod: 7
+      DBInstanceClass: !Ref RDSClass
+      DBParameterGroupName: !Ref RDSDBParameterGroup
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      Engine: !Ref RDSEngine
+      EngineVersion: !Ref RDSEngineVersion
+      LicenseModel: !Ref RDSLicenseModel
+      MasterUsername: !Ref MasterUserName
+      MasterUserPassword: !Ref MasterUserPassword
+      MultiAZ: !Ref MultiAZchoice
+      PreferredBackupWindow: 18:00-18:30
+      PreferredMaintenanceWindow: Sat:19:00-Sat:19:30
+      PubliclyAccessible: !Ref PubliclyAccessible
+      VPCSecurityGroups:
+        - Ref: VPCSecurityGroup
+Outputs:
+  EndpointAddress:
+    Value:
+      Fn::GetAtt:
+        - DB
+        - Endpoint.Address
+  EndpointPort:
+    Value:
+      Fn::GetAtt:
+        - DB
+        - Endpoint.Port

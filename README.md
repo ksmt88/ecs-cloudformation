@@ -5,6 +5,7 @@ ecs-cloudformation
 ### Attach policies
 - AmazonEC2ContainerRegistryFullAccess
 - AmazonEC2ContainerServiceFullAccess
+- AmazonRDSFullAccess
 - AmazonS3ReadOnlyAccess
 - AmazonVPCFullAccess
 - AWSCloudFormationFullAccess

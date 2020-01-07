@@ -150,4 +150,4 @@ Outputs:
   PrivateCSubnetId:
     Value: !Ref MySubnetPrivateC
   EcsSecurityGroup:
-    Value: !Ref: EcsSecurityGroup
+    Value: !Ref EcsSecurityGroup

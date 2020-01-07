@@ -8,6 +8,13 @@ Parameters:
     Type: String
     Default: production
     Description: production or staging
+  MasterUserName:
+    Type: String
+    Default: rds_admin
+  MasterUserPassword:
+    Type: String
+    NoEcho: true
+    Description: least 8 characters
 Mappings:
   CidrMap:
     production:
@@ -54,25 +61,53 @@ Resources:
             - CidrMap
             - Ref: environment
             - PrivateC
-      TemplateURL: https://s3-ap-northeast-1.amazonaws.com/{bucket_name}/sample/vpc.yml
+      TemplateURL: https://s3-ap-northeast-1.amazonaws.com/cf-templates-1q4n5naoe0i3o-ap-northeast-1/sample/vpc.yml
   ECSStack:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
         ClusterName: SampleCluster
-      TemplateURL: https://s3-ap-northeast-1.amazonaws.com/{bucket_name}/sample/ecs.yml
+      TemplateURL: https://s3-ap-northeast-1.amazonaws.com/cf-templates-1q4n5naoe0i3o-ap-northeast-1/sample/ecs.yml
   ECRStackNginx:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
         RepositoryName: sample_app_nginx
-      TemplateURL: https://s3-ap-northeast-1.amazonaws.com/{bucket_name}/sample/ecr.yml
+      TemplateURL: https://s3-ap-northeast-1.amazonaws.com/cf-templates-1q4n5naoe0i3o-ap-northeast-1/sample/ecr.yml
   ECRStackPhp:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
         RepositoryName: sample_app_php
-      TemplateURL: https://s3-ap-northeast-1.amazonaws.com/{bucket_name}/sample/ecr.yml
+      TemplateURL: https://s3-ap-northeast-1.amazonaws.com/cf-templates-1q4n5naoe0i3o-ap-northeast-1/sample/ecr.yml
+  RDSStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        ProjectName: !Ref ProjectName
+        environment: !Ref environment
+        MasterUserName: !Ref MasterUserName
+        MasterUserPassword: !Ref MasterUserPassword
+        PrivateASubnetId:
+          Fn::GetAtt:
+            - VPCStack
+            - Outputs.PrivateASubnetId
+        PrivateCSubnetId:
+          Fn::GetAtt:
+            - VPCStack
+            - Outputs.PrivateCSubnetId
+        RDSFamily: MySQL8.0
+        RDSEngine: MySQL
+        RDSEngineVersion: 8.0.16
+        RDSLicenseModel: general-public-license
+        RDSClass: db.t2.micro
+        RDSName: sample
+        MultiAZchoice: false
+        VPCSecurityGroup:
+          Fn::GetAtt:
+            - VPCStack
+            - Outputs.EcsSecurityGroup
+      TemplateURL: https://s3-ap-northeast-1.amazonaws.com/cf-templates-1q4n5naoe0i3o-ap-northeast-1/sample/rds.yml
 Outputs:
   VPCId:
     Value:
